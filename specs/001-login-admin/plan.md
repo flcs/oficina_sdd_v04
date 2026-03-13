@@ -1,113 +1,120 @@
-# Implementation Plan: [FEATURE]
+# Implementation Plan: Pagina de Login com Admin Inicial
 
-**Branch**: `[###-feature-name]` | **Date**: [DATE] | **Spec**: [link]
-**Input**: Feature specification from `/specs/[###-feature-name]/spec.md`
-
-**Note**: This template is filled in by the `/speckit.plan` command. See `.specify/templates/plan-template.md` for the execution workflow.
+**Branch**: `001-login-admin` | **Date**: 2026-03-13 | **Spec**: `specs/001-login-admin/spec.md`
+**Input**: Feature specification from `/specs/001-login-admin/spec.md`
 
 ## Summary
 
-[Extract from feature spec: primary requirement + technical approach from research]
+Entregar pagina de login em React + TypeScript integrada a um backend Python
+com arquitetura hexagonal, bootstrap idempotente do admin
+`admin@empresa.com`, troca obrigatoria de senha inicial, lockout por 5 falhas
+em 15 minutos e respostas seguras: `400` para payload invalido, `401` para
+falha de autenticacao e bloqueio, e `503` com `Retry-After` para
+indisponibilidade temporaria de dependencia.
 
 ## Technical Context
 
-<!--
-  ACTION REQUIRED: Replace the content in this section with the technical details
-  for the project. The structure here is presented in advisory capacity to guide
-  the iteration process.
--->
-
-**Language/Version**: [e.g., Python 3.11, Swift 5.9, Rust 1.75 or NEEDS CLARIFICATION]  
-**Primary Dependencies**: [e.g., FastAPI, UIKit, LLVM or NEEDS CLARIFICATION]  
-**Storage**: [if applicable, e.g., PostgreSQL, CoreData, files or N/A]  
-**Testing**: [e.g., pytest with unit/integration/contract coverage or NEEDS CLARIFICATION]  
-**Target Platform**: [e.g., Linux server, iOS 15+, WASM or NEEDS CLARIFICATION]
-**Project Type**: [e.g., library/cli/web-service/mobile-app/compiler/desktop-app or NEEDS CLARIFICATION]  
-**Performance Goals**: [domain-specific, e.g., 1000 req/s, 10k lines/sec, 60 fps or NEEDS CLARIFICATION]  
-**Constraints**: [domain-specific plus constitution constraints: OO design, abstraction-first dependencies, SOLID, strict typing, TDD or NEEDS CLARIFICATION]  
-**Scale/Scope**: [domain-specific, e.g., 10k users, 1M LOC, 50 screens or NEEDS CLARIFICATION]
+**Language/Version**: Python 3.12 and TypeScript 5.x  
+**Primary Dependencies**: FastAPI, Uvicorn, psycopg 3, psycopg_pool, PyJWT, argon2-cffi, Pydantic v2, pydantic-settings, React, Vite, React Router, Axios  
+**Storage**: PostgreSQL 16+ via psycopg 3 with explicit SQL (no ORM)  
+**Testing**: pytest (unit/integration/contract/performance), Vitest + React Testing Library  
+**Target Platform**: Linux backend service and modern browsers  
+**Project Type**: web application (backend + SPA frontend)  
+**Performance Goals**: API login p95 < 300 ms (excluding network), token validation p95 < 100 ms, and end-to-end login journey measured to support SC-001 (95% <= 30 s)  
+**Constraints**: OO design, dependency on abstractions, SOLID, strict typing, mandatory TDD, hexagonal architecture, repository pattern, JWT only in Authorization header, native PostgreSQL driver only, no ORM  
+**Scale/Scope**: one authentication slice with login UI/API, bootstrap admin flow, mandatory initial password change, lockout and observability
 
 ## Constitution Check
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-- Object model is defined with explicit responsibilities, collaborators, and
-  boundaries; procedural orchestration without domain objects is rejected.
-- Business rules depend on abstractions only; composition-root ownership of
-  concrete wiring is documented.
-- SOLID impact is explained for new or changed classes, and strict Python typing
-  strategy is identified for all public and internal interfaces.
-- TDD plan is explicit: failing tests first, then implementation, then
-  refactoring; required unit, integration, and contract coverage is listed.
-- Complexity deviations from clarity and maintainability are justified in
-  Complexity Tracking with a simpler alternative considered.
+- PASS: Domain behavior is modeled with cohesive objects and explicit boundaries.
+- PASS: Business rules rely on ports/abstractions; concrete adapters are wired only at composition root.
+- PASS: SOLID and strict typing remain explicit across production code and tests.
+- PASS: TDD order is preserved in tasks: tests first, then implementation, then refactor.
+- PASS: No complexity exception is required for this feature.
+
+**Post-Design Re-check**: PASS. `research.md`, `data-model.md`,
+`contracts/openapi.yaml`, `quickstart.md`, and `tasks.md` are aligned with
+the constitution and with the latest clarifications.
 
 ## Project Structure
 
 ### Documentation (this feature)
 
 ```text
-specs/[###-feature]/
-├── plan.md              # This file (/speckit.plan command output)
-├── research.md          # Phase 0 output (/speckit.plan command)
-├── data-model.md        # Phase 1 output (/speckit.plan command)
-├── quickstart.md        # Phase 1 output (/speckit.plan command)
-├── contracts/           # Phase 1 output (/speckit.plan command)
-└── tasks.md             # Phase 2 output (/speckit.tasks command - NOT created by /speckit.plan)
+specs/001-login-admin/
+├── plan.md
+├── research.md
+├── data-model.md
+├── quickstart.md
+├── contracts/
+└── tasks.md
 ```
 
 ### Source Code (repository root)
-<!--
-  ACTION REQUIRED: Replace the placeholder tree below with the concrete layout
-  for this feature. Delete unused options and expand the chosen structure with
-  real paths (e.g., apps/admin, packages/something). The delivered plan must
-  not include Option labels.
--->
 
 ```text
-# [REMOVE IF UNUSED] Option 1: Single project (DEFAULT)
-src/
-├── models/
-├── services/
-├── cli/
-└── lib/
-
-tests/
-├── contract/
-├── integration/
-└── unit/
-
-# [REMOVE IF UNUSED] Option 2: Web application (when "frontend" + "backend" detected)
 backend/
 ├── src/
-│   ├── models/
-│   ├── services/
-│   └── api/
+│   ├── domain/
+│   │   ├── entities/
+│   │   ├── value_objects/
+│   │   └── services/
+│   ├── application/
+│   │   ├── dto/
+│   │   ├── ports/
+│   │   └── use_cases/
+│   ├── adapters/
+│   │   ├── http/
+│   │   ├── persistence/
+│   │   ├── security/
+│   │   └── observability/
+│   └── bootstrap/
 └── tests/
+    ├── contract/
+    ├── integration/
+    ├── performance/
+    └── unit/
 
 frontend/
 ├── src/
 │   ├── components/
 │   ├── pages/
-│   └── services/
+│   ├── services/
+│   └── styles/
 └── tests/
+    ├── integration/
+    └── unit/
 
-# [REMOVE IF UNUSED] Option 3: Mobile + API (when "iOS/Android" detected)
-api/
-└── [same as backend above]
-
-ios/ or android/
-└── [platform-specific structure: feature modules, UI flows, platform tests]
+sql/
+├── migrations/
+└── fixtures/
 ```
 
-**Structure Decision**: [Document the selected structure and reference the real
-directories captured above]
+**Structure Decision**: Web split with hexagonal backend and React SPA frontend.
+Repository adapters isolate SQL; HTTP adapters map behavior to contract-safe
+responses, including `503 + Retry-After` and neutral lockout semantics.
+
+## Phase 0 Research Summary
+
+- Decision: Keep lockout response semantics neutral and contract-tested without
+  exposing account existence.
+- Decision: Use `503 + Retry-After` for transient auth dependency failures.
+- Decision: Validate `400` vs `401` at contract level and keep neutral messages.
+- Decision: Allow future reuse of `admin` password after initial mandatory
+  change, as clarified in spec.
+
+## Phase 1 Design Summary
+
+- `data-model.md` defines account, login attempt, session, and bootstrap event
+  entities with lockout and password-change state transitions.
+- `contracts/openapi.yaml` defines login/change-password/identity endpoints
+  with explicit `400`, `401`, and `503` semantics.
+- `quickstart.md` includes TDD flow and manual validation for lockout,
+  temporary unavailability, and performance checkpoints.
+- Tasks include dedicated coverage for SC-001 evidence and API latency checks.
 
 ## Complexity Tracking
 
-> **Fill ONLY if Constitution Check has violations that must be justified**
-
-| Violation | Why Needed | Simpler Alternative Rejected Because |
-|-----------|------------|-------------------------------------|
-| [e.g., 4th project] | [current need] | [why 3 projects insufficient] |
-| [e.g., Repository pattern] | [specific problem] | [why direct DB access insufficient] |
+Nenhuma violacao de constituicao identificada.

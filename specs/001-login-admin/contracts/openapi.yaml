@@ -27,6 +27,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/LoginSuccessResponse'
+        '400':
+          description: Invalid login payload (missing/empty/invalid fields)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
         '401':
           description: Authentication failed with a generic message
           headers:
@@ -37,14 +43,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-        '423':
-          description: Account temporarily locked
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/LockedResponse'
         '503':
           description: Authentication service temporarily unavailable
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+              description: Number of seconds clients should wait before retrying
           content:
             application/json:
               schema:
@@ -132,18 +138,6 @@ components:
           minimum: 1
         account:
           $ref: '#/components/schemas/CurrentIdentityResponse'
-    LockedResponse:
-      type: object
-      required: [code, message, locked_until]
-      properties:
-        code:
-          type: string
-          const: ACCOUNT_TEMPORARILY_LOCKED
-        message:
-          type: string
-        locked_until:
-          type: string
-          format: date-time
     ChangeInitialPasswordRequest:
       type: object
       required: [current_password, new_password]

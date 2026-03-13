@@ -129,6 +129,25 @@ constituicao do repositorio.
 - Mockar driver nativo em testes de persistencia: rejeitado por nao validar SQL,
   constraints e concorrencia reais.
 
+## Semantica de Erros HTTP
+
+### Decision
+Padronizar respostas de autenticacao com `400` para payload invalido,
+`401` para falhas de autenticacao (incluindo lockout com resposta neutra) e
+`503` com header `Retry-After` para indisponibilidade temporaria da dependencia
+de autenticacao.
+
+### Rationale
+Essa combinacao elimina ambiguidades de contrato, preserva seguranca contra
+enumeracao de contas e oferece uma orientacao objetiva de retry quando a falha
+for transitoria e externa ao usuario.
+
+### Alternatives considered
+- `423 Locked` para lockout: rejeitado para evitar divergencia com a politica de
+  resposta neutra e reduzir sinalizacao indevida sobre estado da conta.
+- `500` para indisponibilidade temporaria: rejeitado por nao comunicar
+  comportamento de retry ao cliente.
+
 ## Riscos e Tradeoffs
 
 ### Decision

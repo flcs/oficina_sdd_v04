@@ -128,11 +128,6 @@ confirmando mensagens adequadas e ausencia de vazamento de dados sensiveis.
 
 ### Edge Cases
 
-<!--
-  ACTION REQUIRED: The content in this section represents placeholders.
-  Fill them out with the right edge cases.
--->
-
 - Quando `admin@empresa.com` ja existir em estado inativo ou inconsistente, o
   processo de inicializacao reativa a conta, preserva sua unicidade e marca
   reset obrigatorio de senha.
@@ -150,11 +145,6 @@ confirmando mensagens adequadas e ausencia de vazamento de dados sensiveis.
 
 ## Requirements *(mandatory)*
 
-<!--
-  ACTION REQUIRED: The content in this section represents placeholders.
-  Fill them out with the right functional requirements.
--->
-
 ### Functional Requirements
 
 - **FR-001**: O sistema MUST disponibilizar uma pagina de login com campos de
@@ -171,10 +161,8 @@ confirmando mensagens adequadas e ausencia de vazamento de dados sensiveis.
 - **FR-004B**: O sistema MUST responder com 401 quando credenciais
   sintaticamente validas estiverem incorretas, com mensagem neutra.
 - **FR-005**: O sistema MUST informar indisponibilidade temporaria quando o
-  servico de autenticacao nao puder concluir a tentativa de login.
-- **FR-005D**: O sistema MUST responder com 503 e incluir header
-  `Retry-After` (segundos) quando houver indisponibilidade temporaria do
-  servico de autenticacao, mantendo mensagem neutra.
+  servico de autenticacao nao puder concluir a tentativa de login, respondendo
+  com 503 e incluindo header `Retry-After` (segundos), com mensagem neutra.
 - **FR-005A**: O sistema MUST aplicar bloqueio temporario por conta quando uma
   mesma conta atingir o limiar definido de falhas consecutivas de autenticacao.
 - **FR-005B**: O sistema MUST bloquear a conta por 15 minutos quando ocorrerem
@@ -241,15 +229,13 @@ confirmando mensagens adequadas e ausencia de vazamento de dados sensiveis.
 
 ## Success Criteria *(mandatory)*
 
-<!--
-  ACTION REQUIRED: Define measurable success criteria.
-  These must be technology-agnostic and measurable.
--->
-
 ### Measurable Outcomes
 
 - **SC-001**: 95% dos usuarios com credenciais validas concluem o login e
   chegam ao destino protegido em ate 30 segundos apos abrir a pagina.
+- **SC-001A**: O sistema MUST registrar metrica de tempo fim-a-fim da jornada
+  de login (abertura da tela ate acesso autorizado) para comprovar SC-001 em
+  ambiente de validacao.
 - **SC-002**: 100% dos ambientes inicializados sem administrador existente
   passam a ter exatamente uma conta `admin@empresa.com` disponivel para o
   primeiro acesso.

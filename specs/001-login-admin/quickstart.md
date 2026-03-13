@@ -21,7 +21,8 @@ Test-Driven Development e a arquitetura planejada.
 2. Escrever os testes unitarios do dominio e dos casos de uso antes de qualquer
    implementacao.
 3. Escrever os testes de contrato HTTP para login, consulta da identidade atual
-   e troca da senha inicial.
+   e troca da senha inicial, incluindo casos 400, 401 e 503 com
+   `Retry-After`.
 4. Escrever os testes de integracao com PostgreSQL real para SQL de repository,
    lockout, bootstrap idempotente e reativacao da conta administrativa.
 5. Implementar o dominio, as portas e os adaptadores minimos para deixar a suite
@@ -29,6 +30,8 @@ Test-Driven Development e a arquitetura planejada.
 6. Refatorar mantendo todos os testes verdes e o strict typing em conformidade.
 7. Implementar a camada frontend em ReactJS + TypeScript e validar integracao
    com os endpoints de autenticacao.
+8. Coletar metricas da jornada de login e validar os criterios SC-001
+   (jornada) e metas de latencia de API em ambiente de validacao.
 
 ## Cenarios de verificacao manual
 
@@ -43,12 +46,15 @@ Test-Driven Development e a arquitetura planejada.
    minutos.
 6. Aguardar a expiracao do bloqueio ou concluir um login posterior com sucesso e
    confirmar reinicio da contagem de falhas.
+7. Simular indisponibilidade temporaria do servico de autenticacao e confirmar
+   resposta 503 com header `Retry-After` e mensagem neutra.
 
 ## Suites esperadas
 
 - `pytest tests/unit`
 - `pytest tests/contract`
 - `pytest tests/integration`
+- `pytest tests/integration/performance`
 - `npm run test -- --run` (frontend)
 
 ## Comandos de referencia
