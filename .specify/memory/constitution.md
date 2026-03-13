@@ -1,116 +1,124 @@
 <!--
-Sync Impact Report
+Relatorio de Impacto de Sincronizacao
 Version change: template -> 1.0.0
-Modified principles:
+Principios modificados:
 - Template Principle 1 -> I. Object-Oriented Design First
 - Template Principle 2 -> II. Depend on Abstractions
 - Template Principle 3 -> III. SOLID with Strict Typing
 - Template Principle 4 -> IV. Test-Driven Development Mandatory
 - Template Principle 5 -> V. Clarity and Maintainability Over Cleverness
-Added sections:
+Secoes adicionadas:
 - Engineering Constraints
 - Delivery Workflow and Quality Gates
-Removed sections:
+Secoes removidas:
 - None
-Templates requiring updates:
+Templates que exigiram atualizacao:
 - ✅ updated .specify/templates/plan-template.md
 - ✅ updated .specify/templates/spec-template.md
 - ✅ updated .specify/templates/tasks-template.md
 - ✅ no command templates present under .specify/templates/commands/
 - ✅ no runtime guidance documents requiring synchronization were found
-Follow-up TODOs:
+TODOs de acompanhamento:
 - None
 -->
 
 # Oficina SDD Constitution
 
-## Core Principles
+## Principios Centrais
 
 ### I. Object-Oriented Design First
-All production code MUST be modeled through explicit objects with clear
-responsibilities, stable public contracts, and cohesive behavior. Features MUST
-be decomposed into domain entities, value objects, services, and orchestration
-components instead of procedural scripts or ad hoc utility flows. Object
-composition is the default mechanism for behavior reuse; inheritance is allowed
-only when it preserves substitutability and reduces duplication without hiding
-control flow. Rationale: a consistent object model improves traceability,
-isolates change, and keeps the system understandable as it grows.
+Todo codigo de producao DEVE ser modelado por meio de objetos explicitos com
+responsabilidades claras, contratos públicos estáveis e comportamento coeso. As
+features MUST ser decompostas em entidades de dominio, value objects, services e
+componentes de orquestracao, em vez de scripts procedurais ou fluxos utilitarios
+ad hoc. Object composition e o mecanismo padrao para reuso de comportamento;
+inheritance e permitida apenas quando preserva substitutability e reduz
+duplicacao sem esconder o control flow. Rationale: um modelo de objetos
+consistente melhora a rastreabilidade, isola mudancas e mantem o sistema
+compreensivel a medida que cresce.
 
 ### II. Depend on Abstractions
-High-level policies MUST depend on interfaces, protocols, or abstract base
-classes rather than concrete implementations. Infrastructure concerns such as
-I/O, persistence, external services, clocks, and randomness MUST enter the
-system through injectable abstractions so they can be replaced in tests and
-evolved without rewriting domain logic. Direct construction of concrete
-dependencies inside business rules is prohibited unless the component itself is
-the composition root. Rationale: dependency inversion reduces coupling and keeps
-the codebase open to change without destabilizing core behavior.
+Politicas de alto nivel MUST depender de interfaces, protocols ou abstract base
+classes em vez de implementacoes concretas. Preocupacoes de infrastructure como
+I/O, persistence, external services, clocks e randomness MUST entrar no sistema
+por meio de abstractions injetaveis para que possam ser substituidas em testes e
+evoluidas sem reescrever a domain logic. A construcao direta de concrete
+dependencies dentro de business rules e proibida, a menos que o proprio
+componente seja o composition root. Rationale: dependency inversion reduz o
+acoplamento e mantem o codebase aberto a mudancas sem desestabilizar o
+comportamento central.
 
 ### III. SOLID with Strict Typing
-Every change MUST satisfy the SOLID principles and MUST preserve strict Python
-typing across production and test code. Single Responsibility, Open/Closed,
-Liskov Substitution, Interface Segregation, and Dependency Inversion are review
-criteria, not optional guidance. Public APIs, internal collaborators, fixtures,
-and data structures MUST declare precise types; use of untyped defs, implicit
-Any, or broad object-shaped contracts is prohibited unless an explicit and
-documented boundary makes it unavoidable. Rationale: strict types and SOLID
-design create mechanically verifiable contracts and prevent architecture drift.
+Toda mudanca MUST satisfazer os principios SOLID e MUST preservar strict Python
+typing em codigo de producao e de teste. Single Responsibility, Open/Closed,
+Liskov Substitution, Interface Segregation e Dependency Inversion sao criterios
+de review, nao orientacoes opcionais. Public APIs, colaboradores internos,
+fixtures e data structures MUST declarar tipos precisos; o uso de untyped defs,
+implicit Any ou contratos amplos em formato de objeto e proibido, salvo quando
+um boundary explicito e documentado tornar isso inevitavel. Rationale: strict
+types e SOLID design criam contratos verificaveis mecanicamente e evitam
+architecture drift.
 
 ### IV. Test-Driven Development Mandatory
-TDD is non-negotiable for every behavior change. Work MUST proceed in the
-red-green-refactor cycle: define the expected behavior, write an automated test
-that fails for the intended reason, implement the smallest change that makes the
-test pass, and then refactor while keeping the suite green. Unit tests are the
-default proof for domain logic; integration and contract tests MUST cover
-cross-boundary behavior, dependency wiring, and regressions in shared contracts.
-No production implementation may be merged without prior failing test evidence
-or an explicit written exception approved during review. Rationale: TDD keeps
-requirements executable and protects maintainability under change.
+TDD e inegociavel para toda mudanca de comportamento. O trabalho MUST seguir o
+red-green-refactor cycle: definir o comportamento esperado, escrever um
+automated test que falhe pelo motivo pretendido, implementar a menor mudanca que
+faca o teste passar e depois refatorar mantendo a suite green. Unit tests sao a
+evidencia padrao para a domain logic; integration e contract tests MUST cobrir
+comportamento entre boundaries, dependency wiring e regressions em contratos
+compartilhados. Nenhuma implementacao de producao pode ser merged sem evidencia
+previa de failing test ou sem uma excecao explicita por escrito aprovada durante
+o review. Rationale: TDD mantem requirements executaveis e protege a
+maintainability diante de mudancas.
 
 ### V. Clarity and Maintainability Over Cleverness
-Implementations MUST favor readable names, small methods, explicit invariants,
-and straightforward control flow over terse abstractions or speculative
-generalization. Each module MUST have a single obvious purpose, each class MUST
-expose behavior through intention-revealing methods, and each change MUST reduce
-or contain cognitive load. Optimizations, framework indirection, and advanced
-language features require a measurable need and a simpler alternative analysis.
-Rationale: this project optimizes for long-term operability, not short-term
-novelty.
+Implementacoes MUST priorizar nomes legiveis, metodos pequenos, invariants
+explicitas e control flow direto em vez de abstractions excessivamente concisas
+ou generalizacao especulativa. Cada modulo MUST ter um unico proposito obvio,
+cada classe MUST expor comportamento por meio de metodos que revelem a intencao
+e cada mudanca MUST reduzir ou conter o cognitive load. Optimizacoes,
+framework indirection e advanced language features exigem uma necessidade
+mensuravel e uma analise de alternativa mais simples. Rationale: este projeto
+otimiza para operabilidade de longo prazo, nao para novidade de curto prazo.
 
-## Engineering Constraints
+## Restricoes de Engenharia
 
-- Python code MUST run with strict static type checking enabled and MUST not
-  introduce new type-checking suppressions without documented justification.
-- Architectural boundaries MUST be explicit in plans, specs, and tasks,
-  including which abstractions isolate domain logic from infrastructure.
-- New features MUST define unit test scope and any required integration or
-  contract coverage before implementation begins.
-- Shared utilities MUST emerge only after duplication is observed in at least
-  two concrete use cases; premature frameworks and god objects are prohibited.
-- Reviews MUST reject changes that bypass abstractions, collapse object
-  responsibilities, or trade maintainability for local convenience.
+- Python code MUST executar com strict static type checking habilitado e MUST
+  nao introduzir novas supressoes de type-checking sem justificativa
+  documentada.
+- Architectural boundaries MUST ser explicitas em plans, specs e tasks,
+  incluindo quais abstractions isolam a domain logic da infrastructure.
+- Novas features MUST definir o escopo de unit tests e toda coverage de
+  integration ou contract tests antes do inicio da implementacao.
+- Shared utilities MUST surgir apenas depois que a duplicacao for observada em
+  pelo menos dois use cases concretos; frameworks prematuros e god objects sao
+  proibidos.
+- Reviews MUST rejeitar mudancas que contornem abstractions, colapsem object
+  responsibilities ou troquem maintainability por conveniencia local.
 
-## Delivery Workflow and Quality Gates
+## Workflow de Entrega e Quality Gates
 
-Every implementation plan MUST include a constitution check that verifies object
-boundaries, abstraction-driven dependencies, SOLID impact, strict typing, and
-TDD strategy. Every feature specification MUST capture independently testable
-user scenarios plus explicit architectural and quality constraints. Every task
-list MUST sequence tests before implementation and include work for typing,
-design boundaries, and refactoring where required. Before merge, reviewers MUST
-confirm that tests were authored first, the automated suite passes, and no new
-architectural shortcuts or typing regressions were introduced.
+Todo implementation plan MUST incluir um constitution check que verifique
+object boundaries, abstraction-driven dependencies, impacto em SOLID, strict
+typing e estrategia de TDD. Toda feature specification MUST registrar user
+scenarios testaveis de forma independente, alem de restricoes explicitas de
+arquitetura e qualidade. Toda task list MUST ordenar testes antes da
+implementacao e incluir trabalho de typing, design boundaries e refactoring
+quando necessario. Antes de merge, reviewers MUST confirmar que os testes foram
+escritos primeiro, que a automated suite passa e que nenhum atalho arquitetural
+novo ou regressao de typing foi introduzido.
 
-## Governance
+## Governanca
 
-This constitution overrides conflicting local practices for the repository.
-Amendments require: (1) a written proposal describing the governance change,
-(2) synchronization of affected templates and workflow documents, and (3)
-explicit review approval from project maintainers. Versioning follows semantic
-rules for governance documents: MAJOR for incompatible principle changes or
-removals, MINOR for new principles or materially expanded obligations, and PATCH
-for clarifications that do not change compliance behavior. Compliance review is
-mandatory for every plan, spec, task list, and code review; violations MUST be
-documented in the relevant artifact with a time-bounded remediation decision.
+Esta constitution se sobrepoe a praticas locais conflitantes do repositorio.
+Amendments exigem: (1) uma proposta por escrito descrevendo a mudanca de
+governanca, (2) sincronizacao dos templates e workflow documents afetados e (3)
+aprovacao explicita em review pelos mantenedores do projeto. O versioning segue
+regras semanticas para documentos de governanca: MAJOR para mudancas ou remocoes
+de principios incompatíveis, MINOR para novos principios ou obrigacoes
+materialmente expandidas e PATCH para esclarecimentos que nao alterem o
+comportamento de compliance. Compliance review e obrigatorio para todo plan,
+spec, task list e code review; violacoes MUST ser documentadas no artifact
+relevante com uma decisao de remediacao delimitada no tempo.
 
 **Version**: 1.0.0 | **Ratified**: 2026-03-13 | **Last Amended**: 2026-03-13
