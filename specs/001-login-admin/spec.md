@@ -13,6 +13,9 @@
 - Q: Quantas falhas consecutivas disparam o bloqueio e por quanto tempo? → A: 5 falhas consecutivas com bloqueio de 15 minutos.
 - Q: O que fazer quando `admin@empresa.com` ja existir, mas estiver inativo ou inconsistente? → A: Reativar a conta e forcar reset de senha.
 - Q: Quando a contagem de falhas consecutivas deve ser zerada? → A: Apos login bem-sucedido e apos expiracao do bloqueio.
+- Q: Qual resposta de erro usar para payload invalido versus credencial incorreta no login? → A: 400 para payload invalido e 401 para credenciais incorretas, com mensagem neutra em ambos.
+- Q: O que fazer se houver tentativa de reutilizar a senha inicial `admin` apos a troca obrigatoria? → A: Permitir reutilizacao.
+- Q: Qual resposta usar quando o servico de autenticacao estiver indisponivel temporariamente? → A: Retornar 503 com mensagem neutra e header Retry-After.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -82,6 +85,9 @@ padrao e confirmar que ela consegue autenticar no primeiro acesso.
 3. **Given** que `admin@empresa.com` ja existe, mas esta inativo ou com estado
   inconsistente, **When** o processo de preparacao do sistema e executado,
   **Then** a conta e reativada, marcada para reset de senha e continua unica.
+4. **Given** que a troca obrigatoria de senha inicial ja foi concluida,
+  **When** o usuario escolher novamente a senha `admin`, **Then** o sistema
+  permite a alteracao conforme a politica definida para a conta.
 
 ---
 
@@ -102,14 +108,19 @@ confirmando mensagens adequadas e ausencia de vazamento de dados sensiveis.
 1. **Given** que o usuario informa credenciais invalidas, **When** envia o
   formulario de login, **Then** o sistema recusa o acesso e apresenta uma
   mensagem generica de falha sem revelar se o email existe.
-2. **Given** que o servico de autenticacao esta indisponivel, **When** o
+2. **Given** que o payload de login possui campos ausentes, vazios, com
+  espacos invalidos ou email malformado, **When** o formulario e enviado,
+  **Then** o sistema responde com erro de validacao de entrada (400) sem
+  expor detalhes sensiveis sobre contas.
+3. **Given** que o servico de autenticacao esta indisponivel, **When** o
   usuario tenta entrar, **Then** o sistema informa indisponibilidade temporaria
-  e orienta uma nova tentativa.
-3. **Given** que uma conta acumula falhas consecutivas de autenticacao,
+  com status 503, mensagem neutra e header `Retry-After` para orientar nova
+  tentativa.
+4. **Given** que uma conta acumula falhas consecutivas de autenticacao,
   **When** a quinta falha consecutiva e registrada, **Then** o sistema bloqueia
   temporariamente essa conta por 15 minutos e continua respondendo sem revelar
   detalhes sensiveis.
-4. **Given** que uma conta foi bloqueada por falhas consecutivas, **When** o
+5. **Given** que uma conta foi bloqueada por falhas consecutivas, **When** o
   bloqueio expira ou um login posterior e concluido com sucesso, **Then** a
   contagem de falhas consecutivas dessa conta e reiniciada.
 
@@ -125,17 +136,17 @@ confirmando mensagens adequadas e ausencia de vazamento de dados sensiveis.
 - Quando `admin@empresa.com` ja existir em estado inativo ou inconsistente, o
   processo de inicializacao reativa a conta, preserva sua unicidade e marca
   reset obrigatorio de senha.
-- Como o sistema se comporta quando email ou senha sao enviados em branco,
-  contendo apenas espacos ou formato de email invalido?
+- Email e senha em branco, com apenas espacos ou email malformado retornam 400,
+  com mensagem neutra e sem revelar informacoes de conta.
 - Como o login responde quando o servico de autenticacao fica indisponivel apos
-  o envio do formulario?
+  o envio do formulario: retorna 503 com mensagem neutra e `Retry-After`.
 - Quando a conta estiver temporariamente bloqueada, o sistema informa a
   indisponibilidade temporaria de acesso sem expor detalhes sensiveis
   adicionais.
 - A contagem de falhas consecutivas e reiniciada apos login bem-sucedido e
   apos o fim do bloqueio de 15 minutos.
-- O que acontece quando alguem tenta reutilizar a senha inicial `admin` depois
-  que a conta administrativa ja teve a senha alterada?
+- A reutilizacao da senha inicial `admin` e permitida apos a troca obrigatoria
+  de senha, respeitando os demais fluxos de autenticacao.
 
 ## Requirements *(mandatory)*
 
@@ -154,8 +165,16 @@ confirmando mensagens adequadas e ausencia de vazamento de dados sensiveis.
   credenciais validas.
 - **FR-004**: O sistema MUST recusar tentativas com credenciais invalidas e
   apresentar mensagem generica que nao revele se o email informado existe.
+- **FR-004A**: O sistema MUST responder com 400 quando o payload de login for
+  invalido (campos ausentes, vazios, espacos invalidos ou email malformado),
+  preservando mensagem neutra sem vazamento de informacoes sensiveis.
+- **FR-004B**: O sistema MUST responder com 401 quando credenciais
+  sintaticamente validas estiverem incorretas, com mensagem neutra.
 - **FR-005**: O sistema MUST informar indisponibilidade temporaria quando o
   servico de autenticacao nao puder concluir a tentativa de login.
+- **FR-005D**: O sistema MUST responder com 503 e incluir header
+  `Retry-After` (segundos) quando houver indisponibilidade temporaria do
+  servico de autenticacao, mantendo mensagem neutra.
 - **FR-005A**: O sistema MUST aplicar bloqueio temporario por conta quando uma
   mesma conta atingir o limiar definido de falhas consecutivas de autenticacao.
 - **FR-005B**: O sistema MUST bloquear a conta por 15 minutos quando ocorrerem
@@ -175,6 +194,8 @@ confirmando mensagens adequadas e ausencia de vazamento de dados sensiveis.
 - **FR-009**: O sistema MUST exigir que a senha inicial da conta
   administrativa seja alterada apos o primeiro login bem-sucedido, antes do uso
   pleno das funcoes administrativas.
+- **FR-009A**: O sistema MUST permitir reutilizacao futura da senha `admin`
+  apos a troca obrigatoria inicial, sem bloquear a alteracao por historico.
 - **FR-010**: O sistema MUST registrar o resultado das tentativas de
   autenticacao e da provisao da conta administrativa para rastreabilidade
   operacional.
@@ -237,10 +258,14 @@ confirmando mensagens adequadas e ausencia de vazamento de dados sensiveis.
   senha obrigatorio.
 - **SC-003**: 100% das tentativas com credenciais invalidas retornam mensagem
   generica sem revelar existencia de conta.
+- **SC-003C**: 100% dos payloads invalidos de login retornam 400, e 100% das
+  credenciais incorretas sintaticamente validas retornam 401.
 - **SC-003A**: 100% das contas que atingirem 5 falhas consecutivas entram em
   bloqueio por 15 minutos antes de uma nova autenticacao ser aceita.
 - **SC-003B**: 100% das contas bloqueadas retomam a contagem de falhas em zero
   apos login bem-sucedido ou apos a expiracao dos 15 minutos de bloqueio.
+- **SC-003D**: 100% das indisponibilidades temporarias do servico de
+  autenticacao retornam 503 com header `Retry-After` valido.
 - **SC-004**: 100% dos primeiros acessos com a conta administrativa inicial
   exigem troca de senha antes do uso pleno das funcoes administrativas.
 - **SC-005**: Todo comportamento novo e entregue com testes automatizados

@@ -20,6 +20,7 @@ verifique se a especificação do login pode ser melhorada, faça sugestões
 /speckit.plan 
 Gere o plano técnico da funcionalidade especificada. 
 A nossa linguagem de programação é Python.
+O stack do frontend é Typescript com ReactJS.
 PostgreSQL como banco de dados utilizando estritamente o driver nativo (não utilize ORMs). 
 A arquitetura de dados deve seguir o padrão Repository. 
 Utilize os conceitos da Arquitetura Hexagonal.

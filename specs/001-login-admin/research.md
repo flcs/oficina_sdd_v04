@@ -23,6 +23,25 @@ primeira entrega.
 - Async-first stack: rejeitada por aumentar complexidade sem ganho claro para um
   fluxo pequeno de autenticacao.
 
+## Stack Frontend
+
+### Decision
+Adotar frontend com ReactJS + TypeScript, build com Vite, roteamento com React
+Router e cliente HTTP com Axios.
+
+### Rationale
+Esse stack oferece maturidade para formularios de autenticacao, excelente
+suporte a tipagem estrita, bom ecossistema de testes e alinhamento com o plano
+de UX para login, bloqueio temporario e troca obrigatoria de senha inicial.
+
+### Alternatives considered
+- Templates server-side puros: rejeitados para esta feature por menor
+  flexibilidade de fluxo de estado no cliente.
+- HTMX: rejeitado nesta iteracao porque a decisao do projeto foi padronizar
+  frontend em ReactJS + TypeScript.
+- PyScript/Pyodide: rejeitados para producao por custo de bundle e maturidade
+  menor no ecossistema de UI.
+
 ## Persistencia PostgreSQL Nativa
 
 ### Decision

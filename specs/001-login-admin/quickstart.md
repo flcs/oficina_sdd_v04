@@ -9,6 +9,7 @@ Test-Driven Development e a arquitetura planejada.
 
 - Python 3.12 disponivel no ambiente.
 - PostgreSQL disponivel com um banco dedicado para desenvolvimento e testes.
+- Node.js 22+ e npm disponiveis para o frontend ReactJS + TypeScript.
 - Variaveis de ambiente configuradas para conexao, chave JWT, emissor e
   audiencia do token.
 
@@ -26,6 +27,8 @@ Test-Driven Development e a arquitetura planejada.
 5. Implementar o dominio, as portas e os adaptadores minimos para deixar a suite
    verde.
 6. Refatorar mantendo todos os testes verdes e o strict typing em conformidade.
+7. Implementar a camada frontend em ReactJS + TypeScript e validar integracao
+   com os endpoints de autenticacao.
 
 ## Cenarios de verificacao manual
 
@@ -46,6 +49,14 @@ Test-Driven Development e a arquitetura planejada.
 - `pytest tests/unit`
 - `pytest tests/contract`
 - `pytest tests/integration`
+- `npm run test -- --run` (frontend)
+
+## Comandos de referencia
+
+- `cd backend && pytest`
+- `cd frontend && npm install`
+- `cd frontend && npm run dev`
+- `cd frontend && npm run test -- --run`
 
 ## Criterio de pronto para planejamento posterior
 
