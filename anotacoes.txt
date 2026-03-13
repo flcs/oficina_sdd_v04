@@ -1,0 +1,15 @@
+
+
+specify init .
+
+/speckit.constitution 
+O código deve seguir estritamente o paradigma de Orientação a Objetos, 
+Dependa de Abstrações evitando depender de classes concretas,
+utilizar princípios SOLID. 
+A tipagem estrita com Python é obrigatória em todo o código. 
+O desenvolvimento deve ser obrigatoriamente guiado por testes (TDD), 
+priorizando a clareza e a manutenibilidade.
+
+/speckit.constitution  O código deve seguir estritamente o paradigma de Orientação a Objetos, Dependa de Abstrações evitando depender de classes concretas, utilizar princípios SOLID. A tipagem estrita com Python é obrigatória em todo o código. O desenvolvimento deve ser obrigatoriamente guiado por testes (TDD), priorizando a clareza e a manutenibilidade.
+
+
