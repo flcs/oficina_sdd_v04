@@ -1,0 +1,178 @@
+openapi: 3.1.0
+info:
+  title: Login and Bootstrap Auth API
+  version: 0.1.0
+  description: |
+    Contract for login, identity retrieval, and mandatory initial password
+    change for the bootstrap administrator.
+servers:
+  - url: https://api.example.local
+security:
+  - bearerAuth: []
+paths:
+  /auth/login:
+    post:
+      summary: Authenticate a user with email and password
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Authentication succeeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginSuccessResponse'
+        '401':
+          description: Authentication failed with a generic message
+          headers:
+            WWW-Authenticate:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '423':
+          description: Account temporarily locked
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LockedResponse'
+        '503':
+          description: Authentication service temporarily unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /auth/change-initial-password:
+    post:
+      summary: Change the initial password when must_change_password is true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangeInitialPasswordRequest'
+      responses:
+        '200':
+          description: Password changed and a new access token issued
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginSuccessResponse'
+        '401':
+          description: Invalid current credentials or invalid token
+          headers:
+            WWW-Authenticate:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Password change requirement cannot be completed as requested
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /auth/me:
+    get:
+      summary: Retrieve the current authenticated identity summary
+      responses:
+        '200':
+          description: Identity resolved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CurrentIdentityResponse'
+        '401':
+          description: Missing, invalid, or expired bearer token
+          headers:
+            WWW-Authenticate:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 1
+    LoginSuccessResponse:
+      type: object
+      required: [access_token, token_type, expires_in_seconds, account]
+      properties:
+        access_token:
+          type: string
+        token_type:
+          type: string
+          const: Bearer
+        expires_in_seconds:
+          type: integer
+          minimum: 1
+        account:
+          $ref: '#/components/schemas/CurrentIdentityResponse'
+    LockedResponse:
+      type: object
+      required: [code, message, locked_until]
+      properties:
+        code:
+          type: string
+          const: ACCOUNT_TEMPORARILY_LOCKED
+        message:
+          type: string
+        locked_until:
+          type: string
+          format: date-time
+    ChangeInitialPasswordRequest:
+      type: object
+      required: [current_password, new_password]
+      properties:
+        current_password:
+          type: string
+          minLength: 1
+        new_password:
+          type: string
+          minLength: 8
+    CurrentIdentityResponse:
+      type: object
+      required: [account_id, email, role, must_change_password]
+      properties:
+        account_id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        role:
+          type: string
+        must_change_password:
+          type: boolean
+    ErrorResponse:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+        message:
+          type: string

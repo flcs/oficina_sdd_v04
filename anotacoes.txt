@@ -10,13 +10,12 @@ A tipagem estrita com Python é obrigatória em todo o código.
 O desenvolvimento deve ser obrigatoriamente guiado por testes (TDD), 
 priorizando a clareza e a manutenibilidade.
 
-/speckit.constitution  O código deve seguir estritamente o paradigma de Orientação a Objetos, Dependa de Abstrações evitando depender de classes concretas, utilizar princípios SOLID. A tipagem estrita com Python é obrigatória em todo o código. O desenvolvimento deve ser obrigatoriamente guiado por testes (TDD), priorizando a clareza e a manutenibilidade.
-
-/speckit.specify Criar pagina de login (frontend) integrada a um backend de serviços e criar um usuario admin@empresa.com com senha admin por padrao no banco de dados.
+/speckit.specify 
+Criar pagina de login (frontend) integrada a um backend de serviços e 
+criar um usuario admin@empresa.com com senha admin por padrao no banco de dados.
 
 /speckit.clarify 
 verifique se a especificação do login pode ser melhorada, faça sugestões
-
 
 /speckit.plan 
 Gere o plano técnico da funcionalidade especificada. 
