@@ -18,6 +18,10 @@
   - Tested independently
   - Deployed independently
   - Demonstrated to users independently
+
+  Constitution alignment:
+  - Each story MUST identify the automated tests that are written first.
+  - Each story MUST preserve object-oriented boundaries and abstraction-driven design.
 -->
 
 ### User Story 1 - [Brief Title] (Priority: P1)
@@ -95,6 +99,19 @@
 - **FR-006**: System MUST authenticate users via [NEEDS CLARIFICATION: auth method not specified - email/password, SSO, OAuth?]
 - **FR-007**: System MUST retain user data for [NEEDS CLARIFICATION: retention period not specified]
 
+### Architectural and Quality Requirements *(mandatory)*
+
+- **AQ-001**: The design MUST express behavior through cohesive objects with
+  explicit responsibilities; procedural feature blobs are not allowed.
+- **AQ-002**: High-level policies MUST depend on abstractions instead of direct
+  concrete infrastructure dependencies.
+- **AQ-003**: All Python code MUST satisfy strict static typing expectations,
+  including tests and supporting utilities.
+- **AQ-004**: The implementation MUST demonstrate SOLID compliance for new and
+  changed types, with substitutions and interfaces remaining safe.
+- **AQ-005**: The delivery plan MUST identify failing tests that will be created
+  before production code and the required unit, integration, and contract scope.
+
 ### Key Entities *(include if feature involves data)*
 
 - **[Entity 1]**: [What it represents, key attributes without implementation]
@@ -113,3 +130,6 @@
 - **SC-002**: [Measurable metric, e.g., "System handles 1000 concurrent users without degradation"]
 - **SC-003**: [User satisfaction metric, e.g., "90% of users successfully complete primary task on first attempt"]
 - **SC-004**: [Business metric, e.g., "Reduce support tickets related to [X] by 50%"]
+- **SC-005**: [Quality metric, e.g., "All new behavior ships with first-written
+  automated tests, passes strict typing, and introduces no constitution
+  violations"]
