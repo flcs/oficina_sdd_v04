@@ -2,70 +2,114 @@
 
 ## Objetivo
 
-Validar a feature de autenticacao e bootstrap administrativo seguindo
-Test-Driven Development e a arquitetura planejada.
+Executar e validar ponta a ponta o fluxo de autenticacao com:
+- bootstrap do admin inicial
+- login com JWT
+- troca obrigatoria de senha no primeiro acesso
+- lockout apos 5 falhas por 15 minutos
+- resposta neutra em 401 e resposta 503 com `Retry-After`
 
 ## Pre-requisitos
 
-- Python 3.12 disponivel no ambiente.
-- PostgreSQL disponivel com um banco dedicado para desenvolvimento e testes.
-- Node.js 22+ e npm disponiveis para o frontend ReactJS + TypeScript.
-- Variaveis de ambiente configuradas para conexao, chave JWT, emissor e
-  audiencia do token.
+- Python 3.12
+- Node.js 22+ e npm
+- PostgreSQL 14+
+- Banco com permissao de criar schema/tabelas
 
-## Fluxo recomendado de execucao
+## Estrutura esperada
 
-1. Criar o schema SQL inicial com tabela de contas, constraints de unicidade por
-   email normalizado e colunas para bloqueio, troca obrigatoria de senha e
-   versao de token.
-2. Escrever os testes unitarios do dominio e dos casos de uso antes de qualquer
-   implementacao.
-3. Escrever os testes de contrato HTTP para login, consulta da identidade atual
-   e troca da senha inicial, incluindo casos 400, 401 e 503 com
-   `Retry-After`.
-4. Escrever os testes de integracao com PostgreSQL real para SQL de repository,
-   lockout, bootstrap idempotente e reativacao da conta administrativa.
-5. Implementar o dominio, as portas e os adaptadores minimos para deixar a suite
-   verde.
-6. Refatorar mantendo todos os testes verdes e o strict typing em conformidade.
-7. Implementar a camada frontend em ReactJS + TypeScript e validar integracao
-   com os endpoints de autenticacao.
-8. Coletar metricas da jornada de login e validar os criterios SC-001
-   (jornada) e metas de latencia de API em ambiente de validacao.
+- `backend/` API FastAPI
+- `frontend/` SPA React + TypeScript
+- `sql/migrations/001_auth_base.sql` schema base
+- `sql/fixtures/auth_seed.sql` dados de fixture
 
-## Cenarios de verificacao manual
+## Variaveis de ambiente (backend)
 
-1. Inicializar o ambiente sem usuarios e confirmar que existe exatamente uma
-   conta `admin@empresa.com` com troca obrigatoria de senha.
-2. Realizar login com as credenciais iniciais e confirmar recebimento de JWT no
-   cabecalho bearer para chamadas subsequentes.
-3. Tentar acessar um endpoint protegido antes da troca de senha e confirmar que
-   apenas o fluxo minimo permitido e liberado.
-4. Trocar a senha inicial, obter nova sessao valida e confirmar acesso pleno.
-5. Executar cinco falhas consecutivas de login e confirmar bloqueio por 15
-   minutos.
-6. Aguardar a expiracao do bloqueio ou concluir um login posterior com sucesso e
-   confirmar reinicio da contagem de falhas.
-7. Simular indisponibilidade temporaria do servico de autenticacao e confirmar
-   resposta 503 com header `Retry-After` e mensagem neutra.
+Exporte estas variaveis antes de iniciar a API:
 
-## Suites esperadas
+```bash
+export DATABASE_URL="postgresql://postgres:postgres@localhost:5432/login_admin"
+export JWT_SECRET_KEY="dev-secret-change-me"
+export JWT_ISSUER="oficina_sdd"
+export JWT_AUDIENCE="oficina_sdd_clients"
+export BOOTSTRAP_ADMIN_EMAIL="admin@empresa.com"
+export BOOTSTRAP_ADMIN_INITIAL_PASSWORD="admin"
+```
 
-- `pytest tests/unit`
-- `pytest tests/contract`
-- `pytest tests/integration`
-- `pytest tests/integration/performance`
-- `npm run test -- --run` (frontend)
+## Setup do banco
 
-## Comandos de referencia
+```bash
+psql "$DATABASE_URL" -f sql/migrations/001_auth_base.sql
+psql "$DATABASE_URL" -f sql/fixtures/auth_seed.sql
+```
 
-- `cd backend && pytest`
-- `cd frontend && npm install`
-- `cd frontend && npm run dev`
-- `cd frontend && npm run test -- --run`
+## Setup e execucao do backend
 
-## Criterio de pronto para planejamento posterior
+```bash
+cd backend
+python -m venv .venv
+source .venv/bin/activate
+pip install -e ".[dev]"
+PYTHONPATH=src uvicorn bootstrap.app_factory:create_app --factory --host 0.0.0.0 --port 8000
+```
 
-- Todos os testes da feature definidos antes da implementacao.
-- Todos os contratos HTTP documentados e coerentes com a spec.
-- Nenhuma dependencia concreta vazando para o dominio ou para os casos de uso.
+## Setup e execucao do frontend
+
+Em outro terminal:
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Frontend esperado em `http://localhost:5173` com proxy para `http://localhost:8000`.
+
+## Testes automatizados
+
+### Backend
+
+```bash
+cd backend
+source .venv/bin/activate
+PYTHONPATH=src pytest tests/unit
+PYTHONPATH=src pytest tests/contract
+PYTHONPATH=src pytest tests/integration
+PYTHONPATH=src pytest tests/integration/performance
+```
+
+### Frontend
+
+```bash
+cd frontend
+npm run test -- --run
+```
+
+## Validacao manual (checklist funcional)
+
+1. Iniciar backend sem contas e confirmar bootstrap de `admin@empresa.com` ativo.
+2. Fazer login com senha inicial e verificar `must_change_password=true`.
+3. Chamar `POST /auth/change-initial-password` e confirmar `200`.
+4. Fazer novo login com senha alterada e verificar `must_change_password=false`.
+5. Chamar `GET /auth/me` com token novo e confirmar identidade.
+6. Forcar 5 logins invalidos consecutivos e confirmar resposta `401` neutra.
+7. Simular indisponibilidade de dependencia e confirmar `503` com header `Retry-After`.
+
+## Checkpoints de qualidade
+
+- `mypy` sem erros em `backend/src`
+- `pytest` verde para suites unit, contract e integration
+- lockout nao vaza estado da conta na mensagem HTTP
+- `openapi.yaml` alinhado com codigos 200/400/401/409/503 e `Retry-After`
+- frontend exibe mensagens neutras para 401 e orientacao de retry para 503
+
+## Troubleshooting rapido
+
+- Erro de import no backend:
+  - confirme `PYTHONPATH=src` ao executar `uvicorn` e `pytest`.
+- Falha de conexao no PostgreSQL:
+  - valide `DATABASE_URL` e permissao de acesso ao banco.
+- 503 no login durante testes locais:
+  - verifique se a API consegue abrir conexao no banco.
+- Token invalido em `/auth/me`:
+  - valide `JWT_SECRET_KEY`, `JWT_ISSUER` e `JWT_AUDIENCE` coerentes entre emissao e validacao.

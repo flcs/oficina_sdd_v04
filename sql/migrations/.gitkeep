@@ -1,0 +1,3 @@
+-- SQL migrations for feature 001-login-admin
+-- Files are applied in lexicographic order.
+-- See sql/migrations/001_auth_base.sql for the base schema.

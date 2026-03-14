@@ -66,11 +66,13 @@ paths:
               $ref: '#/components/schemas/ChangeInitialPasswordRequest'
       responses:
         '200':
-          description: Password changed and a new access token issued
+          description: Password changed successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LoginSuccessResponse'
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                detail: "Password changed successfully."
         '401':
           description: Invalid current credentials or invalid token
           headers:
@@ -126,18 +128,19 @@ components:
           minLength: 1
     LoginSuccessResponse:
       type: object
-      required: [access_token, token_type, expires_in_seconds, account]
+      required: [access_token, token_type, must_change_password]
       properties:
         access_token:
           type: string
+          description: Signed JWT to be sent as `Authorization: Bearer <token>`
         token_type:
           type: string
-          const: Bearer
-        expires_in_seconds:
-          type: integer
-          minimum: 1
-        account:
-          $ref: '#/components/schemas/CurrentIdentityResponse'
+          const: bearer
+        must_change_password:
+          type: boolean
+          description: >
+            True when the account requires an immediate password change
+            before accessing protected resources.
     ChangeInitialPasswordRequest:
       type: object
       required: [current_password, new_password]
@@ -164,9 +167,10 @@ components:
           type: boolean
     ErrorResponse:
       type: object
-      required: [code, message]
+      required: [detail]
       properties:
-        code:
+        detail:
           type: string
-        message:
-          type: string
+          description: >
+            A human-readable error message. Always a neutral string — never
+            discloses account state (locked, inactive, etc.).

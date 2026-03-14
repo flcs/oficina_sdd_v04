@@ -1,0 +1,2 @@
+-- SQL fixtures for deterministic test data.
+-- See sql/fixtures/auth_seed.sql created in T051.

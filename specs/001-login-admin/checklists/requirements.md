@@ -33,3 +33,17 @@
 
 - Validacao concluida sem pendencias abertas.
 - O requisito de troca de senha no primeiro login foi assumido como controle de seguranca para a conta administrativa inicial.
+
+## Quickstart Validation (T057)
+
+Data: 2026-03-14
+
+- [x] Quickstart atualizado com comandos reais de setup e execucao (backend/frontend)
+- [x] Contrato OpenAPI revisado para codigos 200/400/401/409/503 e header `Retry-After`
+- [x] Fixtures SQL adicionadas para contas ativa, bloqueada e must-change-password
+- [x] Suites de teste adicionadas para E2E, lockout, 503 e feedback frontend
+- [ ] Execucao completa de `pytest` e `npm test` no ambiente local
+
+Observacoes:
+- A varredura de erros no workspace confirmou os novos arquivos sem erros de sintaxe/reporting local.
+- A execucao completa das suites ficou pendente de instalacao de dependencias e ambiente (venv Python + npm + PostgreSQL configurado).
